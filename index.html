@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Image Converter Tool</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 90%;
+      max-width: 500px;
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    input[type="file"], select, button {
+      padding: 10px;
+      margin: 10px 0;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      cursor: pointer;
+      background: #28a745;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #218838;
+    }
+    #imagePreview {
+      margin-top: 20px;
+      max-width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      display: none;
+    }
+    #downloadBtn {
+      background-color: #007bff;
+    }
+    #downloadBtn:hover {
+      background-color: #0069d9;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Image Converter Tool</h1>
+    <input type="file" id="fileInput" accept="image/*">
+    <select id="format">
+      <option value="image/jpeg">Convert to JPG</option>
+      <option value="image/png">Convert to PNG</option>
+      <option value="image/webp">Convert to WebP</option>
+    </select>
+    <button onclick="convertImage()">Convert</button>
+    <button id="downloadBtn" onclick="downloadImage()" style="display:none;">Download</button>
+    <img id="imagePreview" alt="Uploaded Image Preview">
+    <canvas id="canvas" style="display:none;"></canvas>
+  </div>
+
+  <script>
+    let convertedDataURL = "";
+
+    document.getElementById('fileInput').addEventListener('change', function () {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = document.getElementById('imagePreview');
+          img.src = e.target.result;
+          img.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function convertImage() {
+      const fileInput = document.getElementById('fileInput');
+      const format = document.getElementById('format').value;
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+
+      if (!fileInput.files[0]) {
+        alert("Please select an image.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = new Image();
+        img.onload = function () {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          convertedDataURL = canvas.toDataURL(format);
+          document.getElementById('downloadBtn').style.display = 'inline-block';
+          alert("Image converted successfully!");
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(fileInput.files[0]);
+    }
+
+    function downloadImage() {
+      if (!convertedDataURL) return;
+      const link = document.createElement('a');
+      const format = document.getElementById('format').value.split('/')[1];
+      link.href = convertedDataURL;
+      link.download = 'converted_image.' + format;
+      link.click();
+    }
+  </script>
+</body>
+</html>
